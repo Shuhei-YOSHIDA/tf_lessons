@@ -1,6 +1,6 @@
 /**
- * @file tf_explain.cpp
- * @breif For contents explaing tf in this repository
+ * @file tf_lesson1.cpp
+ * @breif static tf broadcaster
  */
 
 #include "ros/node_handle.h"
@@ -10,10 +10,11 @@
 
 void tf_static_example()
 {
-  // 内部でTFの情報をkeepするので寿命を長く取ること．
+  // 内部でtfの情報をkeepするので寿命を長く取ること．
   // このstaticを消して，この関数の最後にsleep(10)など入れて
-  // TFがどれだけ利用可能か調べてみよう
-  // ros::NodeHandle::advertise<T>(topic, queue, lauch)でlatch=trueになっている
+  // tfがどれだけ利用可能か調べてみよう
+  // tfのbroadcastはtopicのpublishと同じ処理であって，StaticTransformBroadcasterでは
+  // ros::NodeHandle::advertise<tf2_msgs::TFMessage>("/tf_static", 100, true)でlatch=trueになっている
   static tf2_ros::StaticTransformBroadcaster s_br;
 
   geometry_msgs::TransformStamped tf;
@@ -29,12 +30,12 @@ void tf_static_example()
   tf.transform.rotation.z = 0.0;
 
   s_br.sendTransform(tf);
-  ROS_INFO("send tf");
+  ROS_INFO("Broadcasted tf");
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "tf_example");
+  ros::init(argc, argv, "tf_lesson1");
   ros::NodeHandle nh;
 
   tf_static_example();

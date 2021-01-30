@@ -52,6 +52,7 @@
   <depend>rospy</depend>
   <depend>tf2_ros</depend>
   <depend>tf2</depend>
+  <depend>visualization_msgs</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
