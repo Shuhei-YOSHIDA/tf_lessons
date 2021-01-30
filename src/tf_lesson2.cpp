@@ -17,28 +17,25 @@ void tf_listener_example()
   ros::Rate loop(0.5); // 1loop for 2sec
   while (ros::ok())
   {
-    //auto stamp = ros::Time::now();
     geometry_msgs::TransformStamped tf_now;
     try
     {
       tf_now = tf_buffer.lookupTransform("world", "base_link", ros::Time::now());
-      ROS_INFO("current time tf has been listened");
+      ROS_INFO("current-time tf has been listened");
     }
     catch(tf2::TransformException &ex)
     {
-      ROS_WARN("%s", ex.what());
-      ROS_WARN("current time tf couldn't be listened");
+      ROS_WARN("current-time tf couldn't be listened: %s", ex.what());
     }
     geometry_msgs::TransformStamped tf_1sec_ago;
     try
     {
       tf_now = tf_buffer.lookupTransform("world", "base_link", ros::Time::now()-ros::Duration(1.0));
-      ROS_INFO("one-sec ago tf has been listened");
+      ROS_INFO("one-sec-ago tf has been listened");
     }
     catch(tf2::TransformException &ex)
     {
-      ROS_WARN("%s", ex.what());
-      ROS_WARN("one-sec ago time tf couldn't be listened");
+      ROS_WARN("one-sec-ago time tf couldn't be listened: %s", ex.what());
     }
     geometry_msgs::TransformStamped tf_maybe_available;
     try
@@ -48,8 +45,7 @@ void tf_listener_example()
     }
     catch(tf2::TransformException &ex)
     {
-      ROS_WARN("%s", ex.what());
-      ROS_WARN("maybe-available ago time tf couldn't be listened");
+      ROS_WARN("maybe-available ago time tf couldn't be listened: %s", ex.what());
     }
 
     loop.sleep();

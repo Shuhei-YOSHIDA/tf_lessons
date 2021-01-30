@@ -137,6 +137,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(lesson1 src/tf_lesson1.cpp)
 add_executable(lesson2 src/tf_lesson2.cpp)
+add_executable(lesson3 src/tf_lesson3.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,12 +149,16 @@ add_executable(lesson2 src/tf_lesson2.cpp)
 ## same as for the library above
 add_dependencies(lesson1 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(lesson2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(lesson3 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(lesson1
   ${catkin_LIBRARIES}
 )
 target_link_libraries(lesson2
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(lesson3
   ${catkin_LIBRARIES}
 )
 

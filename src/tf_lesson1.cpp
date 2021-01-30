@@ -3,7 +3,6 @@
  * @breif static tf broadcaster
  */
 
-#include "ros/node_handle.h"
 #include <ros/ros.h>
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
