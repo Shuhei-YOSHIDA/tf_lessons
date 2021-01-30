@@ -11,6 +11,10 @@
 
 void tf_listener_example()
 {
+  // tf2_ros::Bufferにtfの履歴を保存する．
+  // 履歴保存の長さのデフォルトは10sであり，コンストラクタの引数で変更可能．
+  // tf2_ros::TransformListernerのメソッドを実行することは無いが/tf,/tf_staticをListen(subscribe)
+  // するために必要なので実行すること．
   static tf2_ros::Buffer tf_buffer;
   static tf2_ros::TransformListener tf_listener(tf_buffer);
 
@@ -30,17 +34,27 @@ void tf_listener_example()
     geometry_msgs::TransformStamped tf_1sec_ago;
     try
     {
-      tf_now = tf_buffer.lookupTransform("world", "base_link", ros::Time::now()-ros::Duration(1.0));
+      tf_1sec_ago = tf_buffer.lookupTransform("world", "base_link", ros::Time::now()-ros::Duration(1.0));
       ROS_INFO("one-sec-ago tf has been listened");
     }
     catch(tf2::TransformException &ex)
     {
       ROS_WARN("one-sec-ago time tf couldn't be listened: %s", ex.what());
     }
+    geometry_msgs::TransformStamped tf_10sec_ago;
+    try
+    {
+      tf_10sec_ago = tf_buffer.lookupTransform("world", "base_link", ros::Time::now()-ros::Duration(10.0));
+      ROS_INFO("ten-sec-ago tf has been listened");
+    }
+    catch(tf2::TransformException &ex)
+    {
+      ROS_WARN("ten-sec-ago time tf couldn't be listened: %s", ex.what());
+    }
     geometry_msgs::TransformStamped tf_maybe_available;
     try
     {
-      tf_now = tf_buffer.lookupTransform("world", "base_link", ros::Time(0));
+      tf_maybe_available = tf_buffer.lookupTransform("world", "base_link", ros::Time(0));
       ROS_INFO("maybe-available tf has been listened");
     }
     catch(tf2::TransformException &ex)
