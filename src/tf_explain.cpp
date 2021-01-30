@@ -13,6 +13,7 @@ void tf_static_example()
   // 内部でTFの情報をkeepするので寿命を長く取ること．
   // このstaticを消して，この関数の最後にsleep(10)など入れて
   // TFがどれだけ利用可能か調べてみよう
+  // ros::NodeHandle::advertise<T>(topic, queue, lauch)でlatch=trueになっている
   static tf2_ros::StaticTransformBroadcaster s_br;
 
   geometry_msgs::TransformStamped tf;
