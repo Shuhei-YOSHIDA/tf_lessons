@@ -138,6 +138,7 @@ include_directories(
 add_executable(lesson1 src/lesson1.cpp)
 add_executable(lesson2 src/lesson2.cpp)
 add_executable(lesson3 src/lesson3.cpp)
+add_executable(lesson5 src/lesson5.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -150,6 +151,7 @@ add_executable(lesson3 src/lesson3.cpp)
 add_dependencies(lesson1 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(lesson2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(lesson3 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(lesson5 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(lesson1
@@ -159,6 +161,9 @@ target_link_libraries(lesson2
   ${catkin_LIBRARIES}
 )
 target_link_libraries(lesson3
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(lesson5
   ${catkin_LIBRARIES}
 )
 

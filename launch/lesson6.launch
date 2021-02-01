@@ -1,0 +1,48 @@
+<launch>
+  <node name="tf_br0" pkg="tf_lessons" type="lesson5"
+        args="onetf world base_1 0.5"/>
+  <node name="tf_br21" pkg="tf_lessons" type="lesson5"
+        args="onetf base_21 base_link 0.5"/>
+
+  <node name="tf_br1" pkg="tf_lessons" type="lesson5"
+        args="onetf base_1 base_2 0.5"/>
+  <node name="tf_br2" pkg="tf_lessons" type="lesson5"
+        args="onetf base_2 base_3 0.5"/>
+  <node name="tf_br3" pkg="tf_lessons" type="lesson5"
+        args="onetf base_3 base_4 0.5"/>
+  <node name="tf_br4" pkg="tf_lessons" type="lesson5"
+        args="onetf base_4 base_5 0.5"/>
+  <node name="tf_br5" pkg="tf_lessons" type="lesson5"
+        args="onetf base_5 base_6 0.5"/>
+  <node name="tf_br6" pkg="tf_lessons" type="lesson5"
+        args="onetf base_6 base_7 0.5"/>
+  <node name="tf_br7" pkg="tf_lessons" type="lesson5"
+        args="onetf base_7 base_8 0.5"/>
+  <node name="tf_br8" pkg="tf_lessons" type="lesson5"
+        args="onetf base_8 base_9 0.5"/>
+  <node name="tf_br9" pkg="tf_lessons" type="lesson5"
+        args="onetf base_9 base_10 0.5"/>
+  <node name="tf_br10" pkg="tf_lessons" type="lesson5"
+        args="onetf base_10 base_11 0.5"/>
+  <node name="tf_br11" pkg="tf_lessons" type="lesson5"
+        args="onetf base_11 base_12 0.5"/>
+  <node name="tf_br12" pkg="tf_lessons" type="lesson5"
+        args="onetf base_12 base_13 0.5"/>
+  <node name="tf_br13" pkg="tf_lessons" type="lesson5"
+        args="onetf base_13 base_14 0.5"/>
+  <node name="tf_br14" pkg="tf_lessons" type="lesson5"
+        args="onetf base_14 base_15 0.5"/>
+  <node name="tf_br15" pkg="tf_lessons" type="lesson5"
+        args="onetf base_15 base_16 0.5"/>
+  <node name="tf_br16" pkg="tf_lessons" type="lesson5"
+        args="onetf base_16 base_17 0.5"/>
+  <node name="tf_br17" pkg="tf_lessons" type="lesson5"
+        args="onetf base_17 base_18 0.5"/>
+  <node name="tf_br18" pkg="tf_lessons" type="lesson5"
+        args="onetf base_18 base_19 0.5"/>
+  <node name="tf_br19" pkg="tf_lessons" type="lesson5"
+        args="onetf base_19 base_20 0.5"/>
+  <node name="tf_br20" pkg="tf_lessons" type="lesson5"
+        args="onetf base_20 base_21 0.5"/>
+
+</launch>
