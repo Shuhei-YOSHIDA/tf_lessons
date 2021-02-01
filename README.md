@@ -21,9 +21,25 @@ tfを扱うにあたっては，
 
 ということに留意する必要がある．
 
+tfによる座標変換と補間は，ある時刻のある座標系間の座標変換をbroadcast/listenすることで行われる．
+broadcast/listenは実態はpublish/subscribeであり，座標変換情報をtopic経由で出力/入力することを指す．
+listenerにはデフォルトで過去10秒分の座標系変換情報が保持されており，
+所望の時刻のある座標系間の変換を，そのデータを用いて時間補間により計算することができる．
+そのため，古すぎる時刻，座標系ツリーにデータ中に途切れのある変換の指定，
+そして補間のためには時刻的に2点で挟む必要があるので最新データでも過去になる
+今現在の時刻の変換が得ることができないという特徴がある．
+(座標変換は保存されたデータの内挿で計算され外挿では行われない)
+
+ただ，実用上は常に座標系ツリーの中に既に固定された座標系変換というものを考えたほうが都合がよい．
+そのために/tf_staticというtopicが用意されており，固定された変換はここにbroadcastされるのが基本となっている．
+これは周期的にtopic /tf_staticにpublish(broadcast)されているわけではなく，
+このtopicに対するsubscribe(listener)が現れるたびにpublishするという実装になっている．
+詳しくはtf2_ros packageのソースstatic_broadcast_publisher.cppを見てみると良いだろう．
+たいてい無駄ではあるが，固定された座標変換を周期的に/tfにbroadcastし続けても結果としては殆ど同じである．
+
 ## static tf
 ### Broadcast and Listen
-* Static TFは時間的に不変として扱われるTF
+* Static TFは時間的に不変として扱われるTFであり/tf_static
 
 ## non-static tf
 ### Broadcast and Listen
