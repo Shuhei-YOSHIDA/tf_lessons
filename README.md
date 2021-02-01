@@ -141,6 +141,16 @@ tfのlistenはtopicのsubscribeと同じであるので，/tfの周波数が増�
 コードを書き換えてlesson2 nodeがpublishするmarkerの様子を見てみると理解が深まるだろう．
 
 ## static_transform_publisher node
+`tf2_ros::StaticTransformBroadcaster`を利用したlesson1 nodeのように，
+ある固定の座標変換をbroadcastし続ける汎用的なnodeがtf2_ros packageにツールとして用意されており，
+static_transform_publisherという．
+次のように座標関係を指定することで実行できる．
+```
+$ rosrun tf2_ros static_transform_publisher 1 2 3 0 0 0 world base_link
+```
+指定している数値はxyzとrpyだがquaternionでもできる．
+
+## Too many broadcasting node
 
 ## URDF + joint_state_publisher + robot_state_publisher
 

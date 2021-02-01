@@ -64,7 +64,7 @@ void tf_non_static_example()
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "tf_lesson1");
+  ros::init(argc, argv, "lesson1");
   ros::NodeHandle nh;
 
   if (argc != 2)

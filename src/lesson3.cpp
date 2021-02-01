@@ -52,7 +52,7 @@ void tf_periodic_example()
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "tf_lesson3");
+  ros::init(argc, argv, "lesson3");
   ros::NodeHandle nh;
 
   tf_periodic_example();

@@ -142,7 +142,7 @@ void tf_listener_example()
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "tf_lesson2");
+  ros::init(argc, argv, "lesson2");
   ros::NodeHandle nh;
 
   tf_listener_example();
