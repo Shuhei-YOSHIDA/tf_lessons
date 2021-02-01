@@ -53,7 +53,7 @@ void tf_non_static_example()
   tf.transform.rotation.y = 0.0;
   tf.transform.rotation.z = 0.0;
 
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 11; i++)
   {
     tf.header.stamp = ros::Time::now();
     s_br.sendTransform(tf);
