@@ -82,7 +82,8 @@ void tf_listener_example()
     try
     {
       tf_now = tf_buffer.lookupTransform("world", "base_link", ros::Time::now());
-      ROS_INFO("current-time tf has been listened");
+      auto stamp = tf_now.header.stamp;
+      ROS_INFO("current-time<%d.%09d> tf has been listened", stamp.sec, stamp.nsec);
     }
     catch(tf2::TransformException &ex)
     {
@@ -93,7 +94,8 @@ void tf_listener_example()
     try
     {
       tf_maybe_available = tf_buffer.lookupTransform("world", "base_link", ros::Time(0));
-      ROS_INFO("maybe-available tf has been listened");
+      auto stamp = tf_maybe_available.header.stamp;
+      ROS_INFO("maybe-available<%d.%09d> tf has been listened", stamp.sec, stamp.nsec);
       mrk_msg.markers[0] = testMarker(tf_maybe_available, "red", 0);
     }
     catch(tf2::TransformException &ex)
@@ -106,7 +108,8 @@ void tf_listener_example()
     try
     {
       tf_1sec_ago = tf_buffer.lookupTransform("world", "base_link", ros::Time::now()-ros::Duration(1.0));
-      ROS_INFO("one-sec-ago tf has been listened");
+      auto stamp = tf_1sec_ago.header.stamp;
+      ROS_INFO("one-sec-ago<%d.%09d> tf has been listened", stamp.sec, stamp.nsec);
       mrk_msg.markers[1] = testMarker(tf_1sec_ago, "green", 1);
     }
     catch(tf2::TransformException &ex)
@@ -119,7 +122,8 @@ void tf_listener_example()
     try
     {
       tf_10sec_ago = tf_buffer.lookupTransform("world", "base_link", ros::Time::now()-ros::Duration(10.0));
-      ROS_INFO("ten-sec-ago tf has been listened");
+      auto stamp = tf_10sec_ago.header.stamp;
+      ROS_INFO("ten-sec-ago<%d.%09d> tf has been listened", stamp.sec, stamp.nsec);
       mrk_msg.markers[2] = testMarker(tf_10sec_ago, "blue", 2);
     }
     catch(tf2::TransformException &ex)

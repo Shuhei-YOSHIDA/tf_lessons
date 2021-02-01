@@ -6,7 +6,7 @@ ROSのTFの利用に関しての個人的な知見について記したレポジ
 ## tf overview
 tfはROSを用いたシステムにおいて，分散した各ノードで
 座標系ツリーと時間に対する補間を管理するためのライブラリである．
-tfとtf2があるが互換性があるので新規にtfを用いたコードを扱う場合はtf2を用いればよい
+tfとtf2があるが互換性があるので新規にtfを用いたコードを扱う場合はtf2を用いればよい．
 ただ，古い方のtfでは座標系管理部分とROSとのインターフェースの部分が混在してたが，
 tf2ではそれらが分割されてそれぞれROSパッケージ "tf2", "tf2_ros" となっている．
 大抵の場合は"tf2_ros"パッケージを呼べば十分であり，"tf2"パッケージを用いる場合は
@@ -37,12 +37,78 @@ listenerにはデフォルトで過去10秒分の座標系変換情報が保持�
 詳しくはtf2_ros packageのソースstatic_broadcast_publisher.cppを見てみると良いだろう．
 たいてい無駄ではあるが，固定された座標変換を周期的に/tfにbroadcastし続けても結果としては殆ど同じである．
 
-## static tf
-### Broadcast and Listen
-* Static TFは時間的に不変として扱われるTFであり/tf_static
+以下では，実際にtfを実行しながら解説する．
+```
+$ # cloneして自分のROS workspaceに本パッケージをビルドすること
+$ roscore
+$ rviz -d tf_lessons/rviz/lesson.rviz #別端末で実行
+```
+すること．
 
-## non-static tf
-### Broadcast and Listen
+## Broadcast and Listen for static TF
+`tf_lesson1.cpp`は簡単なtfをbroadcastする例である．
+"world"座標系から"base_link"座標系への変換をbroadcastしている．
+
+`tf_lesson1.cpp`はlesson1というnode名であり，引数を付けて次の通り実行する．
+```
+$ rosrun tf_lessons lesson1 static
+```
+このとき，`tf2_ros::StaticTransformBroadcaster`を用いて，/tf_staticに座標変換をbroadcastしている．
+RViz上にその座標変換がTF RViz pluginにより表示されているはずだ．
+次のコマンドを実行してみよう．
+```
+$ rostopic echo /tf_static
+$ rostopic hz /tf_static
+```
+最初のコマンドでは，一度だけ座標変換の内容が表示されるはずだ．
+そして2つ目のコマンドでは，`new_message`と表示されつづけるはずである．
+最初のコマンドを何度繰り返してもtopicの内容が一度だけ表示される．
+これは/tf_staticが周期的にbroadcast(publish)されているのではなく，
+それをlisten(subscribe)するものが現れたときに，
+lesson1 nodeによって一度だけbroadcastされているからである．
+
+次に`tf_lesson2.cpp`を実行する．
+これは，tfをlistenする例であるが，
+100Hz周期で現在時刻，1秒前，10秒前，最新利用可能時刻でのtfをlistenして，
+1秒前，10秒前，最新利用時刻の指定で得た"world"から"base_link"への座標変換を
+それぞれ赤色，緑色および青色のマーカーでRViz上に表示させるnodeである．
+listenが成功したかどうかは端末に出力される．
+```
+$ rosrun tf_lessons lesson2
+```
+実行すると最初だけ失敗するがすべての時刻においてtfがlistenできることがわかるだろう．
+
+## Broadcast and Listen for dynamic(non-static) TF
+前章で起動したRVizやroscore，nodeがそのままなら一度すべて終了させて，
+roscore, RVizを起動しよう．
+以下では"world"，"base_link"といった座標系の名前などを再利用するが，
+Static, 非Staticなtfで同じ変換が混在する場合，RVizの表示などに不具合が生じる可能性があるようだ．
+
+今回，lesson1 nodeは引数を変えて実行する．
+'''
+$ rosrun tf_lessons lesson1 non-static
+'''
+このとき，`tf2_ros::TransformBroadcaster`を用いて，/tfに座標変換をbroadcastしている．
+一秒間に一回同じ変換をbroadcastすることを10回繰り返している．
+RViz上でTF pluginにより座標変換が表示されるが，薄くなって消えていくのがわかるだろう．
+非staticなtfは古いものは捨てられる運用のためかこのような表示が行われるようにこのpluginは実装されている．
+(PluginをOn/Offすれば再び表示されるが...)
+
+既に述べたようにtf listenerはデフォルトで過去10秒分のbroadcastされた座標変換の履歴を有しており，
+それに基づき補間することで所望の座標変換を計算する．
+一度lesson1 nodeを終了させて，lesson2 nodeを起動させたあとに再びlesson1 nodeを起動させてみよう．
+
+
+
+
+
+
+###
+また余談ではあるが，このとき引数"static"を付けた場合のlesson1 nodeでは
+`tf2_ros::StaticTransformBroadcaster`で一定の座標変換をbroadcastしているが，
+例えば`tf2_ros::StaticTransformBroadcaster`を使ってwhile loop中で座標変換を変化させてbroadcastすると，
+/tf_staticをlistenするlistenerは座標系の補間を行わずに常に最新の座標変換のみを返す．
+コードを書き換えてlesson2 nodeがpublishするmarkerの様子を見てみると理解が深まるだろう．
 
 ## static_transform_publisher node
 
