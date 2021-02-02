@@ -9,12 +9,14 @@
 using namespace std;
 
 string base_name = "base_";
+const double hz = 100;
 
 void onetf(string world_frame_id, string base_frame_id, double x)
 {
   static tf2_ros::TransformBroadcaster tf_br;
 
-  ros::Rate loop(100);
+  ros::Rate loop(hz);
+  //int i = 0;
   while (ros::ok())
   {
     geometry_msgs::TransformStamped tf;
@@ -23,6 +25,10 @@ void onetf(string world_frame_id, string base_frame_id, double x)
     tf.child_frame_id = base_frame_id;
     tf.transform.rotation.w = 1.0;
     tf.transform.translation.y = x;
+
+    //if (i*1./hz > 2*M_PI) i = 0;
+    //i++;
+    //tf.transform.translation.x = x*sin(1./hz*i);
 
     tf_br.sendTransform(tf);
     loop.sleep();
@@ -47,16 +53,22 @@ void multitf(string world_frame_id, int num, double x)
     tf.child_frame_id = base_name + to_string(i+1);
     tf.transform.rotation.w = 1.0;
     tf.transform.translation.y = x;
+
     tfs.push_back(tf);
   }
 
-  ros::Rate loop(10);
+  ros::Rate loop(hz);
+  //int i = 0;
   while (ros::ok())
   {
     auto stamp = ros::Time::now();
     for (auto&& tf : tfs)
     {
       tf.header.stamp = stamp;
+
+      //if (i*1./hz > 2*M_PI) i = 0;
+      //i++;
+      //tf.transform.translation.x = x*sin(1./hz*i);
     }
     tf_br.sendTransform(tfs);
     loop.sleep();

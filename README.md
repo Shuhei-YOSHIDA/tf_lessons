@@ -194,10 +194,12 @@ lesson5 nodeでは100Hzで/tf topic にbroadcast(publish)しているはずだ�
 100Hzでpublishするnodeが独立に22個存在しているので結果的に約2200Hzのtopicになってしまっていることがわかる．
 実際のセンサなどのnodeは100Hz以上で更新されることが多く，
 考慮せずにtfをbroadcastするnodeを増やすと周波数は大きくなるこのような状況になってしまうだろう．
-このような状況で割合低い周波数でbroadcastするSLAMのようなnodeがあると，
-その分のtfをlistenできなくなる場合が存在する．
-[参考](https://garaemon.github.io/ros/2014/12/31/ros.html)
-
+このような状況だと，各nodeのlisten自体が間に合わなくなったり，
+割合低い周波数でbroadcastするSLAMのような他のnodeがあると，
+その分のtfをlistenできなくなる場合が存在する
+[参考](https://garaemon.github.io/ros/2014/12/31/ros.html).
+lesson5 のコメント部分を外してtfに動きを付けて，同じtfの内容でも/tf topicの周波数の違いで
+RVizの表示がどう異なるか試してみると良いだろう(ただこの辺は各々の環境の違いがでるかもしれない).
 
 次はlesson5 nodeの引数に'multitf'を指定して，複数の座標変換を同時にtfにbroadcastしてみる．
 ```
