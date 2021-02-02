@@ -140,17 +140,57 @@ tfのlistenはtopicのsubscribeと同じであるので，/tfの周波数が増�
 /tf_staticをlistenするlistenerは座標系の補間を行わずに常に最新の座標変換のみを返す．
 コードを書き換えてlesson2 nodeがpublishするmarkerの様子を見てみると理解が深まるだろう．
 
-## static_transform_publisher node
+## static\_transform\_publisher node
 `tf2_ros::StaticTransformBroadcaster`を利用したlesson1 nodeのように，
-ある固定の座標変換をbroadcastし続ける汎用的なnodeがtf2_ros packageにツールとして用意されており，
+ある固定の座標変換を/tf_staticにbroadcastし続ける汎用的なnodeがtf2_ros packageにツールとして用意されており，
 static_transform_publisherという．
 次のように座標関係を指定することで実行できる．
 ```
 $ rosrun tf2_ros static_transform_publisher 1 2 3 0 0 0 world base_link
 ```
 指定している数値はxyzとrpyだがquaternionでもできる．
+このnodeはtfで表現する座標系ツリーの中でせいぜい1つ2つの変換をbroadcastするのに用いることが多い．
+
+static\_transform\_publisherは一つのnodeで一つの座標変換を扱っている．
+staticなtfなので新しくsubscriberが現れた場合にしかbroadcastしないが，
+同時に複数のstatic\_transform\_publisherを実行するとどうなるかlesson4.launchを実行して確かめてみよう．
+```
+$ roslaunch tf_lessons lesson4.launch
+$ rostopic hz /tf_static # 別端末で
+$ rostopic bw /tf_static # 別端末で
+```
+lesson4.launch では数珠つなぎにつながる座標変換を22個のstatic_transform_publisherで実行している．
+RViz上に座標系が並んで表示されているのが見えるはずだ．
+`rostopic hz` や `rostopic bw`の結果を見ると瞬間的に/tf_staticの周波数が増えたりネットワークを占める
+バンド幅が瞬間的に増大していることがわかる．
+
+static_transform_publisherでのbroadcastは周期的でないので問題になることはまず無いが，
+無駄にnodeを実行しても仕方がないし，tfによってROSのtopicが飛ぶネットワークに
+このように負荷がかかることがこの事例から理解できるだろう．
+非staticなtfについてのこのような場合については次章でも確かめていく．
 
 ## Too many broadcasting node
+ここからはroscoreとRVizを再び実行し直してから始める．
+
+lesson5 nodeは`tf2_ros::TransformBroadcaster`を用いて非staticなtfをbroadcastするnode である．
+引数を指定してある1つの座標変換をbroadcastするか複数の座標変換を同時にbroadcastするか設定することができる．
+```
+$ rosrun tf_lesson lesson5 onetf world base_link 0.5 # single tf by one node
+$ rosrun tf_lesson lesson5 multitf world 20 0.5 # multiple(twenty) tf by one node
+```
+lesson5 nodeには10Hz周期でbroadcastさせている．これは`rostopic hz /tf`で調べられるだろう．
+
+このlesson5 nodeを使って数珠つなぎの座標変換を複数のnodeを使ってbroadcastする場合と，
+1つのnodeでbroadcastする場合の違いについて調べる．
+複数のlesson 5 nodeを同時に起動するために，lesson6.launchを用いる．
+lesson6.launchではlesson5 nodeの引数に`onetf`を指定し，同時に22個起動して，
+数珠つなぎの座標系変換をtfにbroadcastするように記述してある．
+
+lesson5 nodeでは10Hzで/tf topic にbroadcast(publish)しているはずだが，
+`rostopic hz /tf`を実行すると/tfの周期が220Hzになっていることに気づくはずだ．
+
+
+
 
 ## URDF + joint_state_publisher + robot_state_publisher
 
