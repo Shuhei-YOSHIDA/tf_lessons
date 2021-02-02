@@ -15,9 +15,9 @@ C++でtf2::Quaternionのような型や座標変換のユーティリティコ�
 tf2での型とEigenの型を変換するtf2_eigenのなどのパッケージがあるのでEigenを用いたほうが良いだろう．
 
 tfを扱うにあたっては，
+* 座標系の変化には管理される期間がある
 * (基本的に)各座標系が一つのツリーの要素になっている
 * 座標系ツリーの中にループする部分がない
-* 座標系の変化には管理される期間がある
 
 ということに留意する必要がある．
 
@@ -46,10 +46,10 @@ $ rviz -d tf_lessons/rviz/lesson.rviz #別端末で実行
 すること．
 
 ## Broadcast and Listen for static TF
-`tf_lesson1.cpp`は簡単なtfをbroadcastする例である．
+`lesson1.cpp`は簡単なtfをbroadcastする例である．
 "world"座標系から"base_link"座標系への変換をbroadcastしている．
 
-`tf_lesson1.cpp`はlesson1というnode名であり，引数を付けて次の通り実行する．
+`lesson1.cpp`はlesson1というnode名であり，引数を付けて次の通り実行する．
 ```
 $ rosrun tf_lessons lesson1 static
 ```
@@ -69,10 +69,9 @@ lesson1 nodeによって一度だけbroadcastされているからである．
 
 次に`tf_lesson2.cpp`を実行する．
 これは，tfをlistenする例であるが，
-100Hz周期で現在時刻，1秒前，10秒前，最新利用可能時刻でのtfをlistenして，
-1秒前，10秒前，最新利用時刻の指定で得た"world"から"base_link"への座標変換を
+100Hz周期で現在時刻，1秒前，10秒前，最新利用可能時刻でのtfをlistenしてその成否を表示し，
+更に1秒前，10秒前，最新利用時刻の指定で得た"world"から"base_link"への座標変換を
 それぞれ赤色，緑色および青色のマーカーでRViz上に表示させるnodeである．
-listenが成功したかどうかは端末に出力される．
 ```
 $ rosrun tf_lessons lesson2
 ```
@@ -88,10 +87,10 @@ Static, 非Staticなtfで同じ変換が混在する場合，RVizの表示など
 '''
 $ rosrun tf_lessons lesson1 non-static
 '''
-このとき，`tf2_ros::TransformBroadcaster`を用いて，/tfに座標変換をbroadcastしている．
+このとき，`tf2_ros::TransformBroadcaster`を用いて，/tf topicに座標変換をbroadcastしている．
 一秒間に一回同じ変換をbroadcastすることを11回繰り返している．
 RViz上でTF pluginにより座標変換が表示されるが，薄くなって消えていくのがわかるだろう．
-非staticなtfは古いものは捨てられる運用のためかこのような表示が行われるようにこのpluginは実装されている．
+非staticなtfは古いものは捨てられるtfの仕様のためかこのような表示が行われるようにこのpluginは実装されている．
 (PluginをOn/Offすれば再び表示されるが...)
 
 既に述べたようにtf listenerはデフォルトで過去10秒分のbroadcastされた座標変換の履歴を有しており，
@@ -100,20 +99,21 @@ RViz上でTF pluginにより座標変換が表示されるが，薄くなって�
 lesson2 nodeの端末への出力から次のようなことが読み取れるはずだ．
 
 最初に最新利用時刻"maybe-available", そして1秒前，10秒前の順にlistenが成功して，
-時間が後，1秒前のtfのlistenに失敗，そして10秒前のlistenに失敗する．
+時間が経つと1秒前のtfのlistenに失敗，そして10秒前のlistenに失敗する．
 最新利用時刻のlistenはその後も可能であるが，その情報の時刻がlesson1 nodeによって
-最後にbroadcastされたものであることと，現在時刻"current-time"のlistenは常に失敗している．
+最後にbroadcastされたものであり，現在時刻"current-time"のlistenは常に失敗している．
 
 これらから，tfのlisterが保持している10秒分のバッファの利用のされ方が理解できるであろう．
+
 次はバッファから計算された座標変換が時間的に補間されたものであることを確認しよう．
 lesson1 nodeを終了して，lesson3 nodeを起動する．
 ```
 $ rosrun tf_lesson lesson3
 ```
-lesson3 nodeでは"world"座標系に対して"base_link"座標系が1秒毎に36度離散的に回転する座標変換を
+lesson3 nodeでは"world"座標系に対して"base_link"座標系が1秒毎に36度だけ離散的に回転する座標変換を
 broadcastしている．
 lesson2 nodeも起動して座標変換をlistenした結果をマーカで可視化しよう．
-lesson2 nodeによりRViz上で次のようなことが読み取れるはずだ．
+このnodeによりRViz上で次のようなことが読み取れるはずだ．
 
 最新利用時刻の座標変換を示す赤のマーカが"base_link"を指すtfによく追従しており，
 1秒前の変換を示している緑のマーカがそのすぐ後ろを追従している．
@@ -178,21 +178,53 @@ lesson5 nodeは`tf2_ros::TransformBroadcaster`を用いて非staticなtfをbroad
 $ rosrun tf_lesson lesson5 onetf world base_link 0.5 # single tf by one node
 $ rosrun tf_lesson lesson5 multitf world 20 0.5 # multiple(twenty) tf by one node
 ```
-lesson5 nodeには10Hz周期でbroadcastさせている．これは`rostopic hz /tf`で調べられるだろう．
+lesson5 nodeには100Hz周期でbroadcastさせている．これは`rostopic hz /tf`で調べられるだろう．
 
 このlesson5 nodeを使って数珠つなぎの座標変換を複数のnodeを使ってbroadcastする場合と，
 1つのnodeでbroadcastする場合の違いについて調べる．
-複数のlesson 5 nodeを同時に起動するために，lesson6.launchを用いる．
+複数のlesson5 nodeを同時に起動するために，lesson6.launchを用いる．
 lesson6.launchではlesson5 nodeの引数に`onetf`を指定し，同時に22個起動して，
 数珠つなぎの座標系変換をtfにbroadcastするように記述してある．
+```
+roslaunch tf_lessons lesson6.launch
+```
+lesson5 nodeでは100Hzで/tf topic にbroadcast(publish)しているはずだが，
+`rostopic hz /tf`を実行すると/tfの周期が約2200Hzになっていることに気づくはずだ．
 
-lesson5 nodeでは10Hzで/tf topic にbroadcast(publish)しているはずだが，
-`rostopic hz /tf`を実行すると/tfの周期が220Hzになっていることに気づくはずだ．
+100Hzでpublishするnodeが独立に22個存在しているので結果的に約2200Hzのtopicになってしまっていることがわかる．
+実際のセンサなどのnodeは100Hz以上で更新されることが多く，
+考慮せずにtfをbroadcastするnodeを増やすと周波数は大きくなるこのような状況になってしまうだろう．
+このような状況で割合低い周波数でbroadcastするSLAMのようなnodeがあると，
+その分のtfをlistenできなくなる場合が存在する．
+[参考](https://garaemon.github.io/ros/2014/12/31/ros.html)
 
 
+次はlesson5 nodeの引数に'multitf'を指定して，複数の座標変換を同時にtfにbroadcastしてみる．
+```
+rosrun tf_lessons lesson5 multitf world 22 0.5
+```
+lesson6.launchと同様に22個の"座標変換"がbroadcastされているがnodeは1つだけである．
+ここでは一度に22個の座標変換をbroadcastしている．
+`rostopic hz /tf`を実行すると，100Hzになっていることがわかる．
+同様の結果が，より効率よく行われている．
+`rostopic bw /tf`の結果も参考になるだろう．
 
+実際のロボットのシステムでは複数の局地座標系を扱わざるを得ない．
+そのために役立つURDFによる記述とrobot_state_publisher nodeについて次章にて述べる．
 
 ## URDF + joint_state_publisher + robot_state_publisher
+一般にロボットのtfのbroadcastに関わる事例としては
+* SLAM
+* GPS
+* コンパス
+* IMU(velocity)
+* カメラ
+* 関節座標
+
+が考えられる．
+これらによる座標変換の中には固定であったり計算や観測の結果として座標変換をするものもあるが，
+その殆どがURDFによる記述と`robot_state_publisher`で1つのtfにまとめてbroadcastすることができる．
+
 
 ## Keep one tf-tree
 ### Representative example of frames
