@@ -197,7 +197,7 @@ lesson5 nodeでは100Hzで/tf topic にbroadcast(publish)しているはずだ�
 このような状況だと，各nodeのlisten自体が間に合わなくなったり，
 割合低い周波数でbroadcastするSLAMのような他のnodeがあると，
 その分のtfをlistenできなくなる場合が存在する
-[参考](https://garaemon.github.io/ros/2014/12/31/ros.html).
+\[[参考](https://garaemon.github.io/ros/2014/12/31/ros.html)\].
 lesson5 のコメント部分を外してtfに動きを付けて，同じtfの内容でも/tf topicの周波数の違いで
 RVizの表示がどう異なるか試してみると良いだろう(ただこの辺は各々の環境の違いがでるかもしれない).
 
@@ -214,25 +214,53 @@ lesson6.launchと同様に22個の"座標変換"がbroadcastされているがno
 実際のロボットのシステムでは複数の局地座標系を扱わざるを得ない．
 そのために役立つURDFによる記述とrobot_state_publisher nodeについて次章にて述べる．
 
-## URDF + joint_state_publisher + robot_state_publisher
+## URDF + robot_state_publisher
 一般にロボットのtfのbroadcastに関わる事例としては
 * SLAM
 * GPS
 * コンパス
 * IMU(velocity)
 * カメラ
-* 関節座標
+* 関節
 
 が考えられる．
 これらによる座標変換の中には固定であったり計算や観測の結果として座標変換をするものもあるが，
-その殆どがURDFによる記述と`robot_state_publisher`で1つのtfにまとめてbroadcastすることができる．
+その殆どがURDFによる記述とrobot_state_publisher nodeを使うことで1つのtfにまとめてbroadcastすることができる．
 
+URDFによってロボットの各リンクの座標系とそのジョイントが記述される．
+1自由度で駆動するジョイントについては，/joint_state topicにsensor_msgs/JointState型の
+メッセージをpublishすることでrobot_state_publisherが対応したtfをbroadcastしてくれる．
+固定のジョイントについては/joint_state にpublishする必要はなく，
+robot_state_publisherはその部分の座標変換を/tf_staticにbroadcastする．
+あまりないと思うが球体ジョイントのような多自由度ジョイントを扱う場合は
+そのtfのbroadcastを実装しなければならない状況であるだろう．
+
+GPS, コンパス，IMU, カメラがロボットのlinkに接続される場合は固定の座標変換であり，
+ある基準の座標系に対してSLAM, GPS, コンパスがその位置・姿勢を与える場合は
+可変する座標変換が必要となる．
+後者のtfのbroadcastについてはrobot_state_publisherの範囲外である．
+
+tfのbroadcast元については，下図のような状況が代表的な例である．
 
 ## Keep one tf-tree
-### Representative example of frames
-/world, /odom, /base_link
+tfで扱われる座標系ツリーは基本的に常に一本かつ, ループする部分が無いことが求められる．
+以下ではこの条件を保つ努力のために，共通認識になっている座標系名と，
+対症療法的なtfの修繕について述べる．
 
-### Connect fragments in ROSBAG data
+### Representative example of frames
+tfで扱われる座標名(frame_id)については任意に設定することができるが，
+共通的に使われるものがいくつか存在する．
+
+* /world : 
+* /odom : 
+* /base_link : 
+
+### Connect fragments of coorinates in ROSBAG data
+ROSにおいてデータを扱う際にtfによる座標関係が整備されていることが望ましい．
+しかし，よく考慮しないままとにかく実験したrosbagの中身を後から見ると，
+センサ周りでtimestampが何故か狂っていたり，tfによる座標関係がつながっていないなどの
+問題が(少なくとも個人的には)見受けられることがときたまある．
+ここではそういう場合の対症療法的なtfのbroadcastに関してのtipsをまとめる．
 
 
 
