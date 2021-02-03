@@ -1,0 +1,48 @@
+<launch>
+<node name="static_tf0" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 world link1"/>
+
+<node name="static_tf21" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link21 base_link"/>
+
+<node name="static_tf1" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link1 link2"/>
+<node name="static_tf2" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link2 link3"/>
+<node name="static_tf3" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link3 link4"/>
+<node name="static_tf4" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link4 link5"/>
+<node name="static_tf5" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link5 link6"/>
+<node name="static_tf6" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link6 link7"/>
+<node name="static_tf7" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link7 link8"/>
+<node name="static_tf8" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link8 link9"/>
+<node name="static_tf9" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link9 link10"/>
+<node name="static_tf10" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link10 link11"/>
+<node name="static_tf11" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link11 link12"/>
+<node name="static_tf12" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link12 link13"/>
+<node name="static_tf13" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link13 link14"/>
+<node name="static_tf14" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link14 link15"/>
+<node name="static_tf15" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link15 link16"/>
+<node name="static_tf16" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link16 link17"/>
+<node name="static_tf17" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link17 link18"/>
+<node name="static_tf18" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link18 link19"/>
+<node name="static_tf19" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link19 link20"/>
+<node name="static_tf20" pkg="tf2_ros" type="static_transform_publisher"
+      args="1 0 0 0 0 0 link20 link21"/>
+</launch>
