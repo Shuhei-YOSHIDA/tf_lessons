@@ -84,9 +84,9 @@ roscore, RVizを起動しよう．
 Static, 非Staticなtfで同じ変換が混在する場合，RVizの表示などに不具合が生じる可能性があるようだ．
 
 今回，lesson1 nodeは引数を変えて実行する．
-'''
+```
 $ rosrun tf_lessons lesson1 non-static
-'''
+```
 このとき，`tf2_ros::TransformBroadcaster`を用いて，/tf topicに座標変換をbroadcastしている．
 一秒間に一回同じ変換をbroadcastすることを11回繰り返している．
 RViz上でTF pluginにより座標変換が表示されるが，薄くなって消えていくのがわかるだろう．
@@ -132,7 +132,7 @@ lesson2 nodeで赤いマーカは十分に追従できている．
 今回はlesson3 nodeが1Hzで/tfにbroadcast(publish)しているために
 赤いマーカは"base_link"にきれいに追従したが，
 tfのlistenはtopicのsubscribeと同じであるので，/tfの周波数が増えると
-追従するが難しくなる．lesson3 nodeのコードを書き換えて試してもらいたい．
+追従するのが難しくなる．lesson3 nodeのコードを書き換えて試してもらいたい．
 
 また余談ではあるが，lesson2 nodeでは
 `tf2_ros::TransformBroadcaster`で座標変換をbroadcastしているが，
@@ -356,13 +356,14 @@ MarkerやPointCloudなど他の情報をRGB画像に重ねて表示したりで�
 平面座標系であるUTM座標系への変換が容易であるので，RTKを導入しSLAMの評価のためのGround Truthとして
 tfを通じて比較するなどの利用法が考えられる．
 
-また，UAVに付けたカメラのジンバル制御するnodeによってはその向きについてtfをbroadcast しないものもあるようだ．
+また，UAVに付けたカメラのジンバルなどは座標系を回転させるものだが，
+制御するnodeによってはtfをbroadcastせず，topicで内部状態を出力するものもあるようだ．
 代わりにgeometry_msgs/Vector3Stamped でジンバルのオイラー角をPublishしていたりする．
 Quaternionに変換してカメラ角度にすることや, ジンバル機構をURDFで記述して/joint_state topicに
 角度情報を送るなどしてtfとして扱うことが考えられる．
 
 これらの情報を後からtfとしてbroadcastするには，
 固定の座標変換の場合はstatic_transform_broadcast nodeを使ったり，
-状況に応じて変化する場合はsubscriber nodeを書いてtopicの内容をtfに書き換えてbroadcastしてやればよい．
+状況に応じて変化する場合はnodeを書いてtopicをsubscribeしてその内容をtfに書き換えてbroadcastしてやればよい．
 tfのAPIはPythonでも使えるようにbindingされているのでlesson7.pyのような簡易なnodeを適宜書いてデバッグしながら
 全体の調整を行えば良い．
