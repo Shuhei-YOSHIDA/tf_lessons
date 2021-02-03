@@ -2,7 +2,6 @@
  * @file lesson5.cpp
  */
 
-#include "geometry_msgs/TransformStamped.h"
 #include <ros/ros.h>
 #include <tf2_ros/transform_broadcaster.h>
 
@@ -16,7 +15,7 @@ void onetf(string world_frame_id, string base_frame_id, double x)
   static tf2_ros::TransformBroadcaster tf_br;
 
   ros::Rate loop(hz);
-  //int i = 0;
+  //double t = 0;
   while (ros::ok())
   {
     geometry_msgs::TransformStamped tf;
@@ -26,9 +25,9 @@ void onetf(string world_frame_id, string base_frame_id, double x)
     tf.transform.rotation.w = 1.0;
     tf.transform.translation.y = x;
 
-    //if (i*1./hz > 2*M_PI) i = 0;
-    //i++;
-    //tf.transform.translation.x = x*sin(1./hz*i);
+    //if (t > 2*M_PI) t = 0;
+    //t += 2*M_PI/hz;
+    //tf.transform.translation.x = x*sin(t);
 
     tf_br.sendTransform(tf);
     loop.sleep();
@@ -58,17 +57,16 @@ void multitf(string world_frame_id, int num, double x)
   }
 
   ros::Rate loop(hz);
-  //int i = 0;
+  //double t = 0;
   while (ros::ok())
   {
     auto stamp = ros::Time::now();
+    //if (t > 2*M_PI) t = 0;
+    //t += 2*M_PI/hz;
     for (auto&& tf : tfs)
     {
       tf.header.stamp = stamp;
-
-      //if (i*1./hz > 2*M_PI) i = 0;
-      //i++;
-      //tf.transform.translation.x = x*sin(1./hz*i);
+      //tf.transform.translation.x = x*sin(t);
     }
     tf_br.sendTransform(tfs);
     loop.sleep();

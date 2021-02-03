@@ -198,8 +198,6 @@ lesson5 nodeでは100Hzで/tf topic にbroadcast(publish)しているはずだ�
 割合低い周波数でbroadcastするSLAMのような他のnodeがあると，
 その分のtfをlistenできなくなる場合が存在する
 \[[参考](https://garaemon.github.io/ros/2014/12/31/ros.html)\].
-lesson5 のコメント部分を外してtfに動きを付けて，同じtfの内容でも/tf topicの周波数の違いで
-RVizの表示がどう異なるか試してみると良いだろう(ただこの辺は各々の環境の違いがでるかもしれない).
 
 次はlesson5 nodeの引数に'multitf'を指定して，複数の座標変換を同時にtfにbroadcastしてみる．
 ```
@@ -210,6 +208,11 @@ lesson6.launchと同様に22個の"座標変換"がbroadcastされているがno
 `rostopic hz /tf`を実行すると，100Hzになっていることがわかる．
 同様の結果が，より効率よく行われている．
 `rostopic bw /tf`の結果も参考になるだろう．
+
+あまり無いとは思うが，早い動作を考えるときに
+tfの時間補間をするという仕様上，各nodeのtfのbroadcastの遅れなどを考える状況もでてくるかもしれない．
+lesson5 のコメント部分を外してtfに動きを付けて，同じtfの内容でも/tf topicの周波数の違いで
+RVizの表示がどう異なるか試してみて考察してみてほしい(ただこの辺は各々の環境の違いがでるかもしれない).
 
 実際のロボットのシステムでは複数の局地座標系を扱わざるを得ない．
 そのために役立つURDFによる記述とrobot_state_publisher nodeについて次章にて述べる．
@@ -241,6 +244,8 @@ GPS, コンパス，IMU, カメラがロボットのlinkに接続される場合
 後者のtfのbroadcastについてはrobot_state_publisherの範囲外である．
 
 tfのbroadcast元については，下図のような状況が代表的な例である．
+robot_state_publisherは/map -> /odom -> /base_footprint -> /base_link -> ...とつながる
+座標系ツリーのうち，/base_footprint以下の座標変換の殆どを扱う．
 ![TF source](images/tf_source.jpeg)
 
 ## Keep one tf-tree
@@ -248,20 +253,116 @@ tfで扱われる座標系ツリーは基本的に常に一本かつ, ループ�
 以下ではこの条件を保つ努力のために，共通認識になっている座標系名と，
 対症療法的なtfの修繕について述べる．
 
-### Representative example of frames
+### Representative name of frames
 tfで扱われる座標名(frame_id)については任意に設定することができるが，
 共通的に使われるものがいくつか存在する．
+(あくまでも推奨であり絶対的な規範ではない．
+\[[REP-105](https://www.ros.org/reps/rep-0105.html)\])が参考になるかもしれない)
 
-* /world : 
+* /world : シミュレーションのように位置に不確かさがないときの原点に用いられる場合が多い(気がする，個人の意見)
+* /map : 
 * /odom : 
+* /base_footprint : 平面移動だけを考えるとき，base_linkに対してz=0のように地面での座標を意味しているようだ
 * /base_link : 
+
+tfによる座標系は以下のように一本のツリーであり，ループしてはならないという制限がある．
+```
+(root)/world -> /map -> /odom -> /base_footprint -> /base_link -> /link1
+                                                               -> /link2 -> /link2-1
+                                                                         -> /link2-2
+                                                               -> ...
+```
+この条件はある座標系から他の座標系(例えば/worldから/link2-2)の変換を考えるとき，
+ある一本道が存在することを保証するためのものである．
+
+以下のようにどこかが切断されていると，二本以上のツリーになってしまう．
+```
+(root)/world -> /map
+====
+(root)/base_footprint -> /base_link -> /link1
+                                    -> /link2 -> /link2-1
+                                              -> /link2-2
+                                              -> ...
+```
+
+ループがあるとは以下のような状況である．
+```
+(root)/world -> /map -> /odom -> /base_footprint -> /base_link -> ...
+                                                 -> /odom
+```
+
+これらのバグはtfのbroadcastの周期によってはrqt_tf_treeといったtfの可視化ツールではわかりにくいことがあり，
+直接/tf, /tf_static topicを読んで確認したほうが発見しやすいかもしれない．
+`rostopic echo /tf`の結果をログに保存して`grep`コマンドなどを使いながら読むといいだろう．
+
+
 
 ### Connect fragments of coorinates in ROSBAG data
 ROSにおいてデータを扱う際にtfによる座標関係が整備されていることが望ましい．
-しかし，よく考慮しないままとにかく実験したrosbagの中身を後から見ると，
+RVizなどを用いて全座標系について関係が設定できているかどうか確認すべきである．
+しかし，ROSを用いてロボットの実験を行い後からrosbagで解析しようとする際，
 センサ周りでtimestampが何故か狂っていたり，tfによる座標関係がつながっていないなどの
-問題が(少なくとも個人的には)見受けられることがときたまある．
+問題が(少なくとも個人的には)見受けられることが時折ある．
+
+基本的にはROSBAGのAPIが整備されているので，内部のtopicなどを直接APIで読み，所望の形に書き換えればよい．
+ただ，情報不足で他のデータを目視しながら修正する場合や容量の大きいbagファイルの場合，
+rosbagを再生しながら適宜コードを書いて様子を確かめたいはずだ．
+ロボットの現在位置をSLAMで出力するといった計算の成否によってtfが出力されるかどうか決まる状況もあるが，
+その時はシステム全体のデバッグとして仮想的にロボットの位置をtfでbroadcastなどするべきだ．
+
 ここではそういう場合の対症療法的なtfのbroadcastに関してのtipsをまとめる．
 
+#### Wrong message meader
+一昨日行った実験の解析をするnodeを今日実行してみたら何故か動かず，
+その時よく各messageのタイムスタンプを見るとわずかにずれていることに気づくということがある．
+`roscore`を実行したあとすぐ`rosparam set /use_sim_time`を設定してからrosbagや各種nodeの起動をしたり，
+`rosbag play --clock` のように--clockオプションの付けることで修正できるはずだ．
+解析nodeのなかに`ros::Time::now()`などが含まれていることを考えて，時間設定を適切に行わなければならない．
 
+センサの出力を扱うROS nodeを実行したとき，センサ側の時刻設定に失敗するなどして，
+メッセージのヘッダー部分のタイムスタンプの値に間違ったものを記録してしまうことがある．
+典型的な例がmsg.header.stamp = 5のように数値が小さい場合だ．ROSの時間はunix時間で表現されているので，
+実機が入る場合はたいてい1300000000(これは2011/3/13 16:06:40 JST)より上のはずだ．
 
+他にもheaderの失敗としてframe_idが適切に設定されてない(空だったりする)状況がある．
+これはセンサのdriver nodeでframe_idを引数で渡すことを失念していたり，
+ROS parameter経由での設定を失敗していたりするのが原因だと思われる(個人的な経験だが…)．
+
+headerの内容を修正する場合には，ROSBAGのAPIでbagfileそのものを書き換えるほかにも
+nodeを作ってsubscribeして修正した後に別topicにpublishし直しても良いだろう．
+C++やpythonのソースを書かなくとも[topic_tools](http://wiki.ros.org/topic_tools/transform) packageの
+transform nodeを用いてその場で次のように別topicにPublishし直すことができる．
+```bash
+$ rosrun topic_tools transform /in_topic /out_topic geometry_msgs/PoseStamped \
+'geometry_msgs.msg.PoseStamped(header=std_msgs.msg.Header(seq=m.header.seq, \
+stamp=rospy.get_rostime(), \
+frame_id="my_new_frame"), \
+pose=m.pose)' \
+--import geometry_msgs std_msgs rospy
+```
+上記はframe_idを"my_new_frame"に変更して，stampを現在の時刻に変更している．
+rosbag 再生時に--clockオプションを付けておけばおおよそ正しい時刻になるだろう．
+
+また，headerのないtopicのpublishした時刻を知りたいといった場合は，
+rosbagにはpublishした時刻まで別に保存してあるのでAPIを叩いて取得するなどすればよい．
+
+#### Add TF broadcaster
+RGBカメラやGPSをtfの座標系に組み込むことが忘れられがちなように思われる．
+RGB画像さえあれば良かったり，正確な外部キャリブレーションが面倒だったりすることや，
+GPSの緯度経度の値しか使わないのでtfにしなくても良いという意見もあるだろう．
+ただ，カメラは大体の値でもいいからtfを設定しておくとRViz Camera Pluginで
+MarkerやPointCloudなど他の情報をRGB画像に重ねて表示したりできるし
+(RViz Image Pluginはtfを利用しない)，ROSのpackageで言えばgeodesyを使えば
+平面座標系であるUTM座標系への変換が容易であるので，RTKを導入しSLAMの評価のためのGround Truthとして
+tfを通じて比較するなどの利用法が考えられる．
+
+また，UAVに付けたカメラのジンバル制御するnodeによってはその向きについてtfをbroadcast しないものもあるようだ．
+代わりにgeometry_msgs/Vector3Stamped でジンバルのオイラー角をPublishしていたりする．
+Quaternionに変換してカメラ角度にすることや, ジンバル機構をURDFで記述して/joint_state topicに
+角度情報を送るなどしてtfとして扱うことが考えられる．
+
+これらの情報を後からtfとしてbroadcastするには，
+固定の座標変換の場合はstatic_transform_broadcast nodeを使ったり，
+状況に応じて変化する場合はsubscriber nodeを書いてtopicの内容をtfに書き換えてbroadcastしてやればよい．
+tfのAPIはPythonでも使えるようにbindingされているのでlesson7.pyのような簡易なnodeを適宜書いてデバッグしながら
+全体の調整を行えば良い．
