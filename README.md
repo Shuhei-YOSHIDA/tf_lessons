@@ -241,6 +241,7 @@ GPS, コンパス，IMU, カメラがロボットのlinkに接続される場合
 後者のtfのbroadcastについてはrobot_state_publisherの範囲外である．
 
 tfのbroadcast元については，下図のような状況が代表的な例である．
+![TF source](images/tf_source.jpeg)
 
 ## Keep one tf-tree
 tfで扱われる座標系ツリーは基本的に常に一本かつ, ループする部分が無いことが求められる．
