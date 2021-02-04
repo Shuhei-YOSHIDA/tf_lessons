@@ -129,6 +129,8 @@ lesson2 nodeで赤いマーカは十分に追従できている．
 その頂点を移動している間の座標変換を時間的に補間することで
 緑と青のマーカは十角形の外接円の円周上を移動している．
 
+[![lesson 3](http://img.youtube.com/vi/6JYh4VM1k7o/0.jpg)](https://www.youtube.com/watch?v=6JYh4VM1k7o ("lesson3 node"))
+
 今回はlesson3 nodeが1Hzで/tfにbroadcast(publish)しているために
 赤いマーカは"base_link"にきれいに追従したが，
 tfのlistenはtopicのsubscribeと同じであるので，/tfの周波数が増えると
